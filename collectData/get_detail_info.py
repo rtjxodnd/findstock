@@ -59,5 +59,4 @@ def get_detail_info(stc_id):
 
 
 if __name__ == '__main__':
-    print(get_detail_info('005930'))
-    print(get_detail_info('590018'))
+    print(get_detail_info('227560'))

@@ -91,4 +91,4 @@ def filter_good_condition(stc_id):
 
 
 if __name__ == '__main__':
-    print(filter_good_condition('352820')) # 352820
+    print(filter_good_condition('227560')) # 352820

@@ -146,5 +146,5 @@ def set_stc_possible_to_go():
 
 
 if __name__ == "__main__":
-    # set_stc_possible_to_go()
-    print(judge_stc_to_go('004250', 3305))
+    set_stc_possible_to_go()
+    # print(judge_stc_to_go('004250', 3305))

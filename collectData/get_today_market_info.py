@@ -38,7 +38,6 @@ def get_today_market_info(mkt_tcd=0, page=1):
 
         # 억단위 적용
         _df['시가총액'] = _df['시가총액']*100000000
-        print(15)
 
         # return
         return _df
