@@ -5,7 +5,7 @@
 
 ###################server####################
 # 가상환경 확인 / 수행
-source stock_test/bin/activate
+source venv_findstock/bin/activate
 
 # 가상환경 중지
 deactivate
