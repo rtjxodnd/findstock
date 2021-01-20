@@ -1,4 +1,8 @@
 # 매집봉 나타낸 주식을 대상으로 이평선 기반으로 차트를 분석한다.
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from commonModule import db_module, dy_module
 from bizLogic.analysis_ma_chart import analysis_ma_chart
 from commonModule.telegram_module import set_stc_data, send_message_to_friends

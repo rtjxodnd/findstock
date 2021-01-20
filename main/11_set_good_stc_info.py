@@ -1,4 +1,8 @@
 # 소형/대형/특정 우량주 정보를 필터링 한다.
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from commonModule import db_module, dy_module
 from bizLogic.filter_good_condition import filter_good_condition
 

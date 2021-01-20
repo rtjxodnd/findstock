@@ -1,4 +1,8 @@
 # 소형우량주 중에서 매집봉이 나타난 종목을 추출하여 db에 저장한다.
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from commonModule import db_module, dy_module
 from bizLogic.search_buying_candle import search_buying_candle
 from collectData.get_daily_price_info import get_daily_price_info

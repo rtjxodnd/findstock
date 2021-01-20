@@ -1,4 +1,8 @@
 # 당일 기준 전종목 정보를 가져와서 종목 기본정보 및 일별 정보를 저장한다.
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 import requests
 import traceback
 from bs4 import BeautifulSoup
