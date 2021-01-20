@@ -1,0 +1,49 @@
+###################local####################
+
+
+
+
+###################server####################
+# 가상환경 확인 / 수행
+source stock_test/bin/activate
+
+# 가상환경 중지
+deactivate
+
+# 로그폴더 이동
+cd /home/ubuntu/project_01/stockToKakao/logs
+
+# 가상환경 수행 부터 토큰획득 위한 플라스크 기동까지
+cd /home/ubuntu/
+source stock_test/bin/activate
+cd /home/ubuntu/project_01/stockToKakao/p1_get_token
+python3 getToken.py
+
+# 프로세스 유지
+Ctrl+Z 를 통해 파이썬 프로세스 중지
+$ bg : 백그라운드에서 프로세스 재 구동
+$ disown -h : 소유권 포기
+
+# 재기동시: flask 가 생성한 pip를 확인
+$ sudo lsof -i :5000
+
+# kill 명령어로 -SIGKILL(-9) 을 PID에 전달
+$ sudo kill -9 9066 9069
+
+
+#크론탭 수정
+crontab -e
+
+#크론탭 시작
+sudo service cron start
+
+
+#크론탭 중지
+sudo service cron stop
+
+
+#크론탭 재시작
+sudo service cron restart
+
+#git pull
+git pull origin master

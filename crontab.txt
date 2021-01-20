@@ -1,0 +1,55 @@
+# 종목 기본정보를 내려 받는다.
+# 월~금 매일  15시 30분
+29 15 * * 1-5 rm /home/ubuntu/project_01/stockToKakao/logs/log_02_stockInfo.log
+30 15 * * 1-5 /home/ubuntu/stock_test/bin/python3 /home/ubuntu/project_01/stockToKakao/p2_get_stock_basic_info/getBasicStockInfo.py >> /home/ubuntu/project_01/stockToKakao/logs/log_02_stockInfo.log
+
+# 소형 재무 우수 종목을 추출하여 DB 정보 수정한다.
+# 월~ 금 매일 15시40분
+39 15 * * 1-5 rm /home/ubuntu/project_01/stockToKakao/logs/log_03_fillteredStockInfo.log
+40 15 * * 1-5 /home/ubuntu/stock_test/bin/python3 /home/ubuntu/project_01/stockToKakao/p3_get_filtered_stock_info/getFilteredStockInfo.py >> /home/ubuntu/project_01/stockToKakao/logs/log_03_fillteredStockInfo.log
+
+# 소형 재무 우수 종목중 상승가능성 있는 종목 DB저장
+# 월~금 매일 16시00분
+59 15 * * 1-5 rm /home/ubuntu/project_01/stockToKakao/logs/log_04_possibilityToIncrease.log
+00 16 * * 1-5 /home/ubuntu/stock_test/bin/python3 /home/ubuntu/project_01/stockToKakao/p4_capture_and_send_message/possibilityToIncrease.py  >> /home/ubuntu/project_01/stockToKakao/logs/log_04_possibilityToIncrease.log
+
+# 대형 재무 우수 종목을 추출하여 DB 정보 수정한다.
+# 월~ 금 16시10분
+09 16 * * 1-5 rm /home/ubuntu/project_01/stockToKakao/logs/log_11_filter_big_stock_info.log
+10 16 * * 1-5 /home/ubuntu/stock_test/bin/python3 /home/ubuntu/project_01/stockToKakao/p11_get_filltered_big_stock_info/getFillteredBigStockInfo.py >> /home/ubuntu/project_01/stockToKakao/logs/log_11_filter_big_stock_info.log
+
+# 소형+대형 재무 우수 종목 이평선 정보를 설정한다
+# 월~금 16시 20분
+19 16 * * 1-5 rm /home/ubuntu/project_01/stockToKakao/logs/log_12_setMa.log
+20 16 * * 1-5 /home/ubuntu/stock_test/bin/python3 /home/ubuntu/project_01/stockToKakao/p12_set_ma_and_send_message/setMa.py other_day >> /home/ubuntu/project_01/stockToKakao/logs/log_12_setMa.log
+
+# 상승가능 종목 중 급등 가능성 있는 종목 추출하여 메시지 송신
+# 월~금 16시30분
+29 16 * * 1-5 rm /home/ubuntu/project_01/stockToKakao/logs/log_04_captureMessage.log
+30 16 * * 1-5 /home/ubuntu/stock_test/bin/python3 /home/ubuntu/project_01/stockToKakao/p4_capture_and_send_message/captureAndSendMessage.py  >> /home/ubuntu/project_01/stockToKakao/logs/log_04_captureMessage.log
+
+# 소형 재무 우수 종목의 전고점 정보를 설정한다
+# 월~ 금 매일 16시40분
+39 16 * * 1-5 rm /home/ubuntu/project_01/stockToKakao/logs/log_05_resisPrice.log
+40 16 * * 1-5 /home/ubuntu/stock_test/bin/python3 /home/ubuntu/project_01/stockToKakao/p5_set_resistance_price/setResistancePrice.py >> /home/ubuntu/project_01/stockToKakao/logs/log_05_resisPrice.log
+
+# 전고점 정보를 설정후 종목별 직전직후 전고점 정보를 설정한다
+# 월~ 금 16시 50분
+49 16 * * 1-5 rm /home/ubuntu/project_01/stockToKakao/logs/log_06_setBp.log
+50 16 * * 1-5 /home/ubuntu/stock_test/bin/python3 /home/ubuntu/project_01/stockToKakao/p6_set_bp_and_send_message/setBpAndSendMessage.py >> /home/ubuntu/project_01/stockToKakao/logs/log_06_setBp.log
+
+# 전종목 이평선 정보를 설정한다
+# 금 17시 00분
+59 16 * * 5 rm /home/ubuntu/project_01/stockToKakao/logs/log_12_setMa.log
+00 17 * * 5 /home/ubuntu/stock_test/bin/python3 /home/ubuntu/project_01/stockToKakao/p12_set_ma_and_send_message/setMa.py friday >> /home/ubuntu/project_01/stockToKakao/logs/log_12_setMa.log
+
+# 장 시작 후 전고점 정보를 참고하여 급등주 포착한다
+# 월~ 금 매일 09시 00분 ~ 16시 00분
+#59 8 * * 1-5 rm /home/ubuntu/project_01/stockToKakao/logs/log_06_setBpAndSendMessage.log
+#*/2 9-15 * * 1-5 /home/ubuntu/stock_test/bin/python3 /home/ubuntu/project_01/stockToKakao/p6_set_bp_and_send_message/setBpAndSendMessage.py >> /home/ubuntu/project_01/stockToKakao/logs/log_06_setBpAndSendMessage.log
+
+# 장 시작 후 이평선 정보 참고하여 돌파정목 포착한다.
+# 월~ 금 09시 30분~ 15시 30분
+59 8 * * 1-5 rm /home/ubuntu/project_01/stockToKakao/logs/log_12_getMaAndSendMessage.log
+30 9-15 * * 1-5 /home/ubuntu/stock_test/bin/python3 /home/ubuntu/project_01/stockToKakao/p12_set_ma_and_send_message/getMaAndSendMessage.py >> /home/ubuntu/project_01/stockToKakao/logs/log_12_getMaAndSendMessage.log
+
