@@ -99,4 +99,4 @@ def set_stc_ma(in_stc_id=None):
 
 
 if __name__ == "__main__":
-    set_stc_ma('009900')
+    set_stc_ma()
