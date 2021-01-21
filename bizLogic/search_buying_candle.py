@@ -36,4 +36,4 @@ def search_buying_candle(stc_id):
 
 
 if __name__ == '__main__':
-    print(search_buying_candle('111710'))
+    print(search_buying_candle('004250'))

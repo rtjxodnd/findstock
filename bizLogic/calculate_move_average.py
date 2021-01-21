@@ -7,22 +7,22 @@ from commonModule.error_module import WrongValueError
 from collectData.get_daily_price_info import get_daily_price_info
 
 # 공통변수
-MAX_MA = 120
-MAX_DAYS = 120
+MAX_MA = 240
+MAX_DAYS = 240
 DEFAULT_VALUE = 0
 
 
 # 이동평균선 추출
 def calculate_move_avg(stc_id, target_ma=DEFAULT_VALUE, days=MAX_DAYS):
     # 입력값 확인
-    if target_ma not in [5, 20, 60, 120, DEFAULT_VALUE]:
-        raise WrongValueError(target_ma, "5, 20, 60, 120, {}, None 중 하나".format(DEFAULT_VALUE))
+    if target_ma not in [5, 20, 60, 120, 240, DEFAULT_VALUE]:
+        raise WrongValueError(target_ma, "5, 20, 60, 120, 240, {}, None 중 하나".format(DEFAULT_VALUE))
 
     # 표시기간이 지정 이평선보다 작은경우 표시일자는 이평선 일자와 동일하게 설정
     if days < target_ma:
         days = target_ma
 
-    # 표시기간이 DEFAULT_VALUE(=0)이면 MAX_DAYS(=120) 로 변경
+    # 표시기간이 DEFAULT_VALUE(=0)이면 MAX_DAYS(=240) 로 변경
     if days == DEFAULT_VALUE:
         days = MAX_DAYS
 
@@ -45,6 +45,8 @@ def calculate_move_avg(stc_id, target_ma=DEFAULT_VALUE, days=MAX_DAYS):
         round_level = -2
     elif daily_info['종가'].iloc[-1] < 1000000:
         round_level = -3
+    else:
+        round_level = -4
 
     # 이평가격 정보 dataframe
     result_ma = pd.DataFrame()
@@ -58,6 +60,8 @@ def calculate_move_avg(stc_id, target_ma=DEFAULT_VALUE, days=MAX_DAYS):
         result_ma['60일이평선'] = daily_info['종가'].rolling(60).mean()
     if target_ma in [120, DEFAULT_VALUE]:
         result_ma['120일이평선'] = daily_info['종가'].rolling(120).mean()
+    if target_ma in [240, DEFAULT_VALUE]:
+        result_ma['240일이평선'] = daily_info['종가'].rolling(240).mean()
 
     # 결과행수
     result_cnt = result_ma.shape[0]
@@ -73,4 +77,4 @@ def calculate_move_avg(stc_id, target_ma=DEFAULT_VALUE, days=MAX_DAYS):
 
 
 if __name__ == "__main__":
-    print(calculate_move_avg('009460', 5, 40))
+    print(calculate_move_avg('009460', 0, 120))

@@ -38,9 +38,6 @@ def judge_stc_to_go(stc_id, now_price):
     # 20일선과 종가 이격도 체크
     ma20_last = ma20_analysis["local_max_min_info"]["원근값"][1]
     if now_price / ma20_last > 1.04 or now_price / ma20_last < 0.96:
-        print(now_price)
-        print(ma20_last)
-        print(now_price / ma20_last )
         return {"judge_to_go_yn": False}
 
     # 5일선 흐름 판정: 상승삼각형 또는 횡보 판정
@@ -87,7 +84,7 @@ def set_stc_possible_to_go():
     # db 모듈
     db_class = db_module.Database()
 
-    # 초기화
+    # data 초기화
     sql = "DELETE from findstock.sc_stc_aram WHERE dy = '%s' and judge_tcd = 'possToGo'" % dy
     db_class.execute(sql)
     db_class.commit()
@@ -147,4 +144,4 @@ def set_stc_possible_to_go():
 
 if __name__ == "__main__":
     set_stc_possible_to_go()
-    # print(judge_stc_to_go('004250', 3305))
+    # print(judge_stc_to_go('228850', 11900))

@@ -9,8 +9,8 @@ from bizLogic.calculate_move_average import calculate_move_avg
 # 극대극소 추출
 def calculate_local_max_min(stc_id, specific_ma, days):
     # 입력값 확인
-    if specific_ma not in [5, 20, 60, 120]:
-        raise WrongValueError(specific_ma, "5, 20, 60, 120중 하나")
+    if specific_ma not in [5, 20, 60, 120, 240]:
+        raise WrongValueError(specific_ma, "5, 20, 60, 120, 240중 하나")
 
     # 이동평균선 추출
     ma_info = calculate_move_avg(stc_id, specific_ma, days)
@@ -43,4 +43,4 @@ def calculate_local_max_min(stc_id, specific_ma, days):
 
 
 if __name__ == "__main__":
-    print(calculate_local_max_min('009460', 5, 60))
+    print(calculate_local_max_min('009460', 240, 60))

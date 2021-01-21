@@ -14,8 +14,8 @@ DN_BASE = -0.05
 # 이평선 차트분석
 def analysis_ma_chart(stc_id, specific_ma, days):
     # 입력값 확인
-    if specific_ma not in [5, 20, 60, 120]:
-        raise WrongValueError(specific_ma, "5, 20, 60, 120중 하나")
+    if specific_ma not in [5, 20, 60, 120, 240]:
+        raise WrongValueError(specific_ma, "5, 20, 60, 120, 240중 하나")
 
     # 극대극소 추출
     local_max_min_info = calculate_local_max_min(stc_id, specific_ma, days)
@@ -38,7 +38,7 @@ def analysis_ma_chart(stc_id, specific_ma, days):
     if np.size(local_max_min_info['극소값']) < 2:
         local_min_gradient = np.gradient(local_max_min_info['원근값']).mean()/local_max_min_info['원근값'][0]
     else:
-        local_min_gradient = np.gradient(local_max_min_info['극소값']).mean() / local_max_min_info['극소값'][0]
+        local_min_gradient = np.gradient(local_max_min_info['극소값']).mean()/local_max_min_info['극소값'][0]
 
     # 극소값 판별
     if local_min_gradient > UP_BASE:
@@ -53,5 +53,5 @@ def analysis_ma_chart(stc_id, specific_ma, days):
 
 
 if __name__ == "__main__":
-    print(analysis_ma_chart('034730', 5, 60))#009460
+    print(analysis_ma_chart('034730', 240, 60))#009460
     # print(np.gradient([1,3,9]).mean())
