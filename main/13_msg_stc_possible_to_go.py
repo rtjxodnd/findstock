@@ -112,11 +112,10 @@ def set_stc_possible_to_go():
             now_price = row['price']
             stop_loss_price = row['stop_loss_price']
 
-            # 메시지순번(시간값으로 대신함)
-            msg_sn = dy_module.now_dt("%Y%m%d%H%M%S%f")
-
             # 판별 및 DB 값 수정
             if judge_stc_to_go(stc_id, now_price)['judge_to_go_yn']:
+                # 메시지순번(시간값으로 대신함)
+                msg_sn = dy_module.now_dt("%Y%m%d%H%M%S%f")
 
                 # db insert
                 insert_stc_aram(db_class, dy, stc_id, now_price, msg_sn)

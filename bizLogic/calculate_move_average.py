@@ -77,4 +77,4 @@ def calculate_move_avg(stc_id, target_ma=DEFAULT_VALUE, days=MAX_DAYS):
 
 
 if __name__ == "__main__":
-    print(calculate_move_avg('009460', 0, 120))
+    print(calculate_move_avg('009900', 0, 120).iloc[-1]['240일이평선'])

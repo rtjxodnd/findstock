@@ -30,16 +30,16 @@ def get_stc_ma_and_insert(in_stc_id=None):
 
     # 대산 종목 조회
     if in_stc_id is not None:
-        sql = "SELECT stc_id, price FROM findstock.sc_stc_basic WHERE stc_id = '%s'" % in_stc_id
+        sql = "SELECT stc_id FROM findstock.sc_stc_basic WHERE stc_id = '%s'" % in_stc_id
     else:
         if len(sys.argv) > 1:
             if sys.argv[1] == 'other_day':
-                sql = "SELECT a.stc_id, a.price FROM findstock.sc_stc_basic a, findstock.sc_stc_filter b " \
+                sql = "SELECT a.stc_id FROM findstock.sc_stc_basic a, findstock.sc_stc_filter b " \
                       "where a.stc_id = b.stc_id and b.helth_yn = 'Y'"
             elif sys.argv[1] == 'friday':
-                sql = "SELECT stc_id, price FROM findstock.sc_stc_basic "
+                sql = "SELECT stc_id FROM findstock.sc_stc_basic "
         else:
-            sql = "SELECT stc_id, price FROM findstock.sc_stc_basic "
+            sql = "SELECT stc_id FROM findstock.sc_stc_basic "
     rows = db_class.execute_all(sql)
 
     # 조회된 건수 바탕으로 data 세팅
@@ -50,10 +50,9 @@ def get_stc_ma_and_insert(in_stc_id=None):
 
             # 대상 데이터
             stc_id = row['stc_id']
-            now_price = row['price']
 
             # 이동평균가격
-            price_info = calculate_move_avg(stc_id, 0, 120).iloc[-1]
+            price_info = calculate_move_avg(stc_id, 0, 120).iloc[-1].fillna(0)
             ma5 = price_info['5일이평선']
             ma20 = price_info['20일이평선']
             ma60 = price_info['60일이평선']
@@ -61,8 +60,8 @@ def get_stc_ma_and_insert(in_stc_id=None):
             ma240 = price_info['240일이평선']
 
             # 이평선정보 저장
-            sql = "insert into findstock.sc_stc_move_avg (stc_id ,now_price, ma5, ma20, ma60, ma120, ma240) " \
-                  "values( '%s','%d','%d','%d','%d','%d','%d')" % (stc_id, now_price, ma5, ma20, ma60, ma120, ma240)
+            sql = "insert into findstock.sc_stc_move_avg (stc_id , ma5, ma20, ma60, ma120, ma240) " \
+                  "values( '%s','%d','%d','%d','%d','%d')" % (stc_id, ma5, ma20, ma60, ma120, ma240)
             db_class.execute(sql)
             db_class.commit()
         except Exception as ex:
@@ -100,4 +99,4 @@ def set_stc_ma(in_stc_id=None):
 
 
 if __name__ == "__main__":
-    set_stc_ma()
+    set_stc_ma('009900')
