@@ -10,11 +10,12 @@ from commonModule.telegram_module import set_stc_data, send_message_to_friends
 
 
 # DB insert
-def insert_stc_aram(db_class, dy, stc_id, price, msg_sn):
+def insert_stc_alarm(db_class, dy, stc_id, price, msg_sn):
     # DB Insert
     try:
-        sql = "INSERT INTO findstock.sc_stc_aram (dy, stc_id, judge_tcd, price, msg_sn) " \
-              "VALUES ('%s', '%s', '%s', '%d', '%s')" % (dy, stc_id, 'maBreakthrough', price, msg_sn)
+        sql = "INSERT INTO findstock.sc_stc_alarm (dy, alarm_sn, stc_id, judge_tcd, price, msg_sn) " \
+              "VALUES ('%s', select ifnull(max(alarm_sn),0)+1 from findstock.sc_stc_alarm where dy='%s', " \
+              "'%s', '%s', '%d', '%s')" % (dy, dy, stc_id, 'maBreakthrough', price, msg_sn)
         db_class.execute(sql)
         db_class.commit()
         return
@@ -31,11 +32,6 @@ def get_ma_and_send_message(in_stc_id=None):
     # 당일
     dy = dy_module.now_dy()
 
-    # data 초기화
-    sql = "DELETE from findstock.sc_stc_aram WHERE dy = '%s' and judge_tcd = 'maBreakthrough'" % dy
-    db_class.execute(sql)
-    db_class.commit()
-
     # 대상건 조회
     sql = "select a.stc_id, b.stc_name, b.price, a.ma5, a.ma20, a.ma60, a.ma120, a.ma240 " \
           "from findstock.sc_stc_move_avg a, findstock.sc_stc_basic b, findstock.sc_stc_filter c " \
@@ -46,7 +42,7 @@ def get_ma_and_send_message(in_stc_id=None):
               "from findstock.sc_stc_move_avg a, findstock.sc_stc_basic b " \
               "where a.stc_id = b.stc_id and a.stc_id = '%s'" % in_stc_id
 
-    rows = db_class.executeAll(sql)
+    rows = db_class.execute_all(sql)
 
     # 조회된 건수 바탕으로 data 세팅 및 메시지 송신
     for row in rows:
@@ -73,13 +69,13 @@ def get_ma_and_send_message(in_stc_id=None):
             ma240 = price_info['240일이평선']
 
             # 새로운 값 DB저장(이평선 정보)
-            sql = "update stock_search.stock_move_avg " \
+            sql = "update findstock.sc_stc_move_avg " \
                   "set ma5 = '%d', ma20 = '%d', ma60= '%d', ma120 = '%d', ma240 = '%d'" \
                   "where stc_id = '%s'" % (ma5, ma20, ma60, ma120, ma240, stc_id)
             db_class.execute(sql)
 
             # 새로운 값 DB저장(현재가 정보)
-            sql = "update stock_search.sc_stc_basic " \
+            sql = "update findstock.sc_stc_basic " \
                   "set price = '%d' where stc_id = '%s'" % (now_price, stc_id)
             db_class.execute(sql)
             db_class.commit()
@@ -212,7 +208,7 @@ def get_ma_and_send_message(in_stc_id=None):
                 send_message_to_friends(msg, msg_sn)
 
                 # db insert
-                insert_stc_aram(db_class, dy, stc_id, now_price, msg_sn)
+                insert_stc_alarm(db_class, dy, stc_id, now_price, msg_sn)
 
         except Exception as ex:
             print("에러: 이평선 돌파 값 저장 및 메시지 송신 에러. 종목코드: {}".format(stc_id))

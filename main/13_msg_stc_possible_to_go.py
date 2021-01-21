@@ -9,10 +9,10 @@ from commonModule.telegram_module import set_stc_data, send_message_to_friends
 
 
 # DB insert
-def insert_stc_aram(db_class, dy, stc_id, price, msg_sn):
+def insert_stc_alarm(db_class, dy, stc_id, price, msg_sn):
     # DB Insert
     try:
-        sql = "INSERT INTO findstock.sc_stc_aram (dy, stc_id, judge_tcd, price, msg_sn) " \
+        sql = "INSERT INTO findstock.sc_stc_alarm (dy, stc_id, judge_tcd, price, msg_sn) " \
               "VALUES ('%s', '%s', '%s', '%d', '%s')" % (dy, stc_id, 'possToGo', price, msg_sn)
         db_class.execute(sql)
         db_class.commit()
@@ -85,7 +85,7 @@ def set_stc_possible_to_go():
     db_class = db_module.Database()
 
     # data 초기화
-    sql = "DELETE from findstock.sc_stc_aram WHERE dy = '%s' and judge_tcd = 'possToGo'" % dy
+    sql = "DELETE from findstock.sc_stc_alarm WHERE dy = '%s' and judge_tcd = 'possToGo'" % dy
     db_class.execute(sql)
     db_class.commit()
 
@@ -94,7 +94,7 @@ def set_stc_possible_to_go():
           "from findstock.sc_stc_candle a, findstock.sc_stc_basic b " \
           "where a.stc_id = b.stc_id and a.dy >= '%s' " \
           "AND a.stc_id NOT IN(" \
-          "select stc_id from findstock.sc_stc_aram where dy >= '%s'" \
+          "select stc_id from findstock.sc_stc_alarm where dy >= '%s'" \
           "and judge_tcd = 'possToGo'" \
           ")" % (base_dt, except_dt)
 
@@ -118,7 +118,7 @@ def set_stc_possible_to_go():
                 msg_sn = dy_module.now_dt("%Y%m%d%H%M%S%f")
 
                 # db insert
-                insert_stc_aram(db_class, dy, stc_id, now_price, msg_sn)
+                insert_stc_alarm(db_class, dy, stc_id, now_price, msg_sn)
 
                 # 메시지송신
                 text_msg = "상승예상 종목 확인!!! \n손절가: {:,}원".format(stop_loss_price)
