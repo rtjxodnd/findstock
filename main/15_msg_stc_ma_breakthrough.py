@@ -1,11 +1,13 @@
 import sys
 import os
-import traceback
+import pandas as pd
+
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from commonModule import db_module, dy_module
 from collectData.get_detail_info import get_detail_info
 from bizLogic.calculate_move_average import calculate_move_avg
+from bizLogic.analysis_ma_chart import analysis_ma_chart
 from commonModule.telegram_module import set_stc_data, send_message_to_friends
 
 
@@ -14,7 +16,7 @@ def insert_stc_alarm(db_class, dy, stc_id, price, msg_sn):
     # DB Insert
     try:
         sql = "INSERT INTO findstock.sc_stc_alarm (dy, alarm_sn, stc_id, judge_tcd, price, msg_sn) " \
-              "VALUES ('%s', select ifnull(max(alarm_sn),0)+1 from findstock.sc_stc_alarm where dy='%s', " \
+              "VALUES ('%s', (select ifnull(max(x.alarm_sn),0)+1 from findstock.sc_stc_alarm x where dy='%s'), " \
               "'%s', '%s', '%d', '%s')" % (dy, dy, stc_id, 'maBreakthrough', price, msg_sn)
         db_class.execute(sql)
         db_class.commit()
@@ -24,8 +26,47 @@ def insert_stc_alarm(db_class, dy, stc_id, price, msg_sn):
         print(de)
 
 
+# 이평선 돌파 판단
+def judge_ma_breakthrough(ma_num, compare_ma, ma_data):
+    # 비교하는 기준 이평선 가격추출: (ma==1 의경우는 현재 가격을 의미 한다.)
+    base_ma_list = ma_data[ma_data['ma'] == ma_num]
+    base_price_old = base_ma_list['old'].iloc[0]
+    base_price_new = base_ma_list['new'].iloc[0]
+
+    # 비교하는 대상 이동평균 값만 추출: ma_num 보다 크면서 compare_ma에 포함되는 이평선
+    ma_list = ma_data[ma_data['ma'] > ma_num]
+    compare_ma_list = ma_list[ma_list['ma'].isin(compare_ma)]
+
+    # 중간값 초기화
+    middle_msg = ''
+    break_yn = False
+
+    # 이평선 돌파여부 확인
+    for i in range(compare_ma_list.shape[0]):
+        # 이평선 이름
+        ma_name = str(compare_ma_list['ma'].iloc[i])
+
+        # 비교대상 이평선
+        ma_old = compare_ma_list['old'].iloc[i]
+        ma_new = compare_ma_list['new'].iloc[i]
+
+        # 상위 이평선 돌파 판정
+        if base_price_old <= ma_old and base_price_new > ma_new:
+            middle_msg = middle_msg + ma_name + " "
+            break_yn = True
+
+        # 메시지 조립
+        if break_yn:
+            if ma_num == 1:
+                middle_msg = "현재가: " + middle_msg + "일선 돌파! \n"
+            else:
+                middle_msg = str(ma_num) + "일선: " + middle_msg + "일선 돌파! \n"
+
+        return {"break_yn": break_yn, "middle_msg": middle_msg}
+
+
 # 이평선 돌파시 메시지 송신
-def get_ma_and_send_message(in_stc_id=None):
+def get_ma_and_send_message(check_ma, compare_ma, in_stc_id=None):
     # db 모듈
     db_class = db_module.Database()
 
@@ -61,145 +102,82 @@ def get_ma_and_send_message(in_stc_id=None):
 
             # 현재가 및 이동평균가격
             price_info = calculate_move_avg(stc_id, 0, 120).iloc[-1].fillna(0)
-            now_price = get_detail_info(stc_id)['가격정보']['현재가'].iloc[0]
-            ma5 = price_info['5일이평선']
-            ma20 = price_info['20일이평선']
-            ma60 = price_info['60일이평선']
-            ma120 = price_info['120일이평선']
-            ma240 = price_info['240일이평선']
+            new_now_price = get_detail_info(stc_id)['가격정보']['현재가'].iloc[0]
+            new_ma5 = price_info['5일이평선']
+            new_ma20 = price_info['20일이평선']
+            new_ma60 = price_info['60일이평선']
+            new_ma120 = price_info['120일이평선']
+            new_ma240 = price_info['240일이평선']
 
             # 새로운 값 DB저장(이평선 정보)
             sql = "update findstock.sc_stc_move_avg " \
                   "set ma5 = '%d', ma20 = '%d', ma60= '%d', ma120 = '%d', ma240 = '%d'" \
-                  "where stc_id = '%s'" % (ma5, ma20, ma60, ma120, ma240, stc_id)
+                  "where stc_id = '%s'" % (new_ma5, new_ma20, new_ma60, new_ma120, new_ma240, stc_id)
             db_class.execute(sql)
 
             # 새로운 값 DB저장(현재가 정보)
             sql = "update findstock.sc_stc_basic " \
-                  "set price = '%d' where stc_id = '%s'" % (now_price, stc_id)
+                  "set price = '%d' where stc_id = '%s'" % (new_now_price, stc_id)
             db_class.execute(sql)
             db_class.commit()
 
+            # 이평선 돌파 확인 위한 dataframe
+            ma_data_list = {'ma': [1, 5, 20, 60, 120, 240],
+                            'old': [old_now_price, old_ma5, old_ma20, old_ma60, old_ma120, old_ma240],
+                            'new': [new_now_price, new_ma5, new_ma20, new_ma60, new_ma120, new_ma240]}
+
+            ma_data = pd.DataFrame(ma_data_list)
+
+            # 이평선 돌파여부 확인
+            result_now = {"break_yn": False, "middle_msg": ''}
+            result_5 = {"break_yn": False, "middle_msg": ''}
+            result_20 = {"break_yn": False, "middle_msg": ''}
+            result_60 = {"break_yn": False, "middle_msg": ''}
+            result_120 = {"break_yn": False, "middle_msg": ''}
+
+            if 1 in check_ma:
+                result_now = judge_ma_breakthrough(1, compare_ma, ma_data)
+            if 5 in check_ma:
+                result_5 = judge_ma_breakthrough(5, compare_ma, ma_data)
+            if 20 in check_ma:
+                result_20 = judge_ma_breakthrough(20, compare_ma, ma_data)
+            if 60 in check_ma:
+                result_60 = judge_ma_breakthrough(60, compare_ma, ma_data)
+            if 120 in check_ma:
+                result_120 = judge_ma_breakthrough(120, compare_ma, ma_data)
+
+            # 돌파여부
+            yn_now = result_now['break_yn']
+            yn_5 = result_5['break_yn']
+            yn_20 = result_20['break_yn']
+            yn_60 = result_60['break_yn']
+            yn_120 = result_120['break_yn']
+
             # 메시지조합
-            yn_now = False
-            yn_5 = False
-            yn_20 = False
-            yn_60 = False
-            yn_120 = False
-
-            msg_temp = ""
-            msg_now = ""
-            msg_5 = ""
-            msg_20 = ""
-            msg_60 = ""
-            msg_120 = ""
-
-            # 현재가 5일선돌파
-            if old_now_price <= old_ma5 and now_price > ma5:
-                msg_temp = msg_temp+"5 "
-                yn_now = True
-
-            # 현재가 20일선돌파
-            if old_now_price <= old_ma20 and now_price > ma20:
-                msg_temp = msg_temp+"20 "
-                yn_now = True
-
-            # 현재가 60일선돌파
-            if old_now_price <= old_ma60 and now_price > ma60:
-                msg_temp = msg_temp+"60 "
-                yn_now = True
-
-            # 현재가 120일선돌파
-            if old_now_price <= old_ma120 and now_price > ma120:
-                msg_temp = msg_temp+"120 "
-                yn_now = True
-
-            # 현재가 240일선돌파
-            if old_now_price <= old_ma240 and now_price > ma240:
-                msg_temp = msg_temp+"240 "
-                yn_now = True
-
-            # 메시지 조립
-            if yn_now:
-                msg_now = "현재가: " + msg_temp + "일선 돌파! \n"
-            msg_temp = ""
-
-            # 5일선 20일선돌파
-            if old_ma5 <= old_ma20 and ma5 > ma20:
-                msg_temp = msg_temp+"20 "
-                yn_5 = True
-
-            # 5일선 60일선돌파
-            if old_ma5 <= old_ma60 and ma5 > ma60:
-                msg_temp = msg_temp+"60 "
-                yn_5 = True
-
-            # 5일선 120일선돌파
-            if old_ma5 <= old_ma120 and ma5 > ma120:
-                msg_temp = msg_temp+"120 "
-                yn_5 = True
-
-            # 5일선 240일선돌파
-            if old_ma5 <= old_ma240 and ma5 > ma240:
-                msg_temp = msg_temp+"240 "
-                yn_5 = True
-
-            # 메시지 조립
-            if yn_5:
-                msg_5 = "5일선: " + msg_temp + "일선 돌파! \n"
-            msg_temp = ""
-
-            # # 20일선 60일선돌파
-            # if old_ma20 <= old_ma60 and ma20 > ma60:
-            #     msg_temp = msg_temp+"60 "
-            #     yn_20 = True
-
-            # 20일선 120일선돌파
-            if old_ma20 <= old_ma120 and ma20 > ma120:
-                msg_temp = msg_temp+"120 "
-                yn_20 = True
-
-            # # 20일선 240일선돌파
-            # if old_ma20 <= old_ma240 and ma20 > ma240:
-            #     msg_temp = msg_temp+"240 "
-            #     yn_20 = True
-
-            # 메시지 조립
-            if yn_20:
-                msg_20 = "20일선: " + msg_temp + "일선 돌파! \n"
-            msg_temp = ""
-
-            # 60일선 120일선돌파
-            if old_ma60 <= old_ma120 and ma60 > ma120:
-                msg_temp = msg_temp+"120 "
-                yn_60 = True
-
-            # 60일선 240일선돌파
-            if old_ma60 <= old_ma240 and ma60 > ma240:
-                msg_temp = msg_temp+"240 "
-                yn_60 = True
-
-            # 메시지 조립
-            if yn_60:
-                msg_60 = "60일선: " + msg_temp + "일선 돌파! \n"
-            msg_temp = ""
-
-            # 120일선 240일선돌파
-            if old_ma120 <= old_ma240 and ma120 > ma240:
-                msg_temp = msg_temp+"240 "
-                yn_120 = True
-
-            # 메시지 조립
-            if yn_120:
-                msg_120 = "120일선: " + msg_temp + "일선 돌파! \n"
+            msg_now = result_now['middle_msg']
+            msg_5 = result_5['middle_msg']
+            msg_20 = result_20['middle_msg']
+            msg_60 = result_60['middle_msg']
+            msg_120 = result_120['middle_msg']
 
             # 최종 메시지 조립
-            msg_final = msg_now+msg_5+msg_20+msg_60+msg_120
-            msg_final = msg_20
+            msg_final = msg_now + msg_5 + msg_20 + msg_60 + msg_120
+
+            # 이평선 돌파 조건 충족시
+            yn_ma = False
+            if yn_now or yn_5 or yn_20 or yn_60 or yn_120:
+                yn_ma = True
+
+            # 이평선 돌파 조건 충족시 5일선과 종가 이격도 체크
+            yn_diff_ma_05 = False
+            if yn_ma:
+                ma05_analysis = analysis_ma_chart(stc_id, 5, 5)
+                ma05_last = ma05_analysis["local_max_min_info"]["원근값"][1]
+                if new_now_price / ma05_last < 1.05:
+                    yn_diff_ma_05 = True
 
             # 메시지 송신
-            # if yn_now or yn_5 or yn_20 or yn_60 or yn_120:
-            if yn_20:
+            if yn_ma and yn_diff_ma_05:
                 # 메시지순번(시간값으로 대신함)
                 msg_sn = dy_module.now_dt("%Y%m%d%H%M%S%f")
 
@@ -208,7 +186,7 @@ def get_ma_and_send_message(in_stc_id=None):
                 send_message_to_friends(msg, msg_sn)
 
                 # db insert
-                insert_stc_alarm(db_class, dy, stc_id, now_price, msg_sn)
+                insert_stc_alarm(db_class, dy, stc_id, new_now_price, msg_sn)
 
         except Exception as ex:
             print("에러: 이평선 돌파 값 저장 및 메시지 송신 에러. 종목코드: {}".format(stc_id))
@@ -219,7 +197,12 @@ def get_ma_and_send_message(in_stc_id=None):
     return
 
 
-def msg_stc_ma_breakthrough(in_stc_id=None):
+def msg_stc_ma_breakthrough(check_ma=None, compare_ma=None, in_stc_id=None):
+    # default 값 설정
+    if check_ma is None:
+        check_ma = [1, 5, 20, 60, 120]
+    if compare_ma is None:
+        compare_ma = [5, 20, 60, 120]
 
     # 거래일 체크
     day_class = dy_module.Day()
@@ -234,7 +217,7 @@ def msg_stc_ma_breakthrough(in_stc_id=None):
     start_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
     # 프로세스 수행
-    get_ma_and_send_message(in_stc_id)
+    get_ma_and_send_message(check_ma, compare_ma, in_stc_id)
 
     # 종료 시간
     end_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
@@ -246,4 +229,4 @@ def msg_stc_ma_breakthrough(in_stc_id=None):
 
 
 if __name__ == "__main__":
-    msg_stc_ma_breakthrough()
+    msg_stc_ma_breakthrough([20], [120], )

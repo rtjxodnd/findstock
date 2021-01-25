@@ -8,6 +8,7 @@ import traceback
 from bs4 import BeautifulSoup
 from commonModule import db_module, dy_module
 from collectData.get_today_market_info import get_today_market_info
+from commonModule.telegram_module import send_message_to_friends
 
 # 공통변수
 FINANCE_URL = "https://finance.naver.com/sise/sise_market_sum.nhn"
@@ -118,9 +119,14 @@ def set_stc_basic_info():
     end_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
     # 종료메시지
-    print("종목정보 수신종료!!!")
-    print("시작시각: ", start_time)
-    print("종료시각: ", end_time)
+    end_msg = "종목정보 수신종료!!!\n" + \
+              "시작시각: {}\n".format(start_time) + \
+              "종료시각: {}\n".format(end_time)
+    print(end_msg)
+
+    # 종료메시지송신
+    end_msg_sn = dy_module.now_dt("%Y%m%d%H%M%S%f")
+    send_message_to_friends(data=end_msg, msg_sn=end_msg_sn, destination='admin')
 
 
 if __name__ == '__main__':

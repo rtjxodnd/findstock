@@ -20,12 +20,19 @@ def set_notice_data():
     return data
 
 
-# 친구에게 메시지송신
-def send_message_to_friends(data, msg_sn):
-    # 토큰조회
+# 친구에게 메시지송신(특정한 경우에는 test 계정에게 송신)
+def send_message_to_friends(data, msg_sn, destination='friend'):
+    # db 클래스
     db_class = db_module.Database()
-    sql = "SELECT id, token_key from findstock.cm_tokens_and_keys where key_tcd = 'telegram_test'"
+
+    # 토큰조회
+    if destination == 'friend':
+        sql = "SELECT id, token_key from findstock.cm_tokens_and_keys where key_tcd = 'telegram_admin'"
+    elif destination == 'admin':
+        sql = "SELECT id, token_key from findstock.cm_tokens_and_keys where key_tcd = 'telegram_admin'"
     row = db_class.execute_one(sql)
+
+    # 토큰 및 id
     telegram_token = row['token_key']
     chat_id = row['id']
     bot = telegram.Bot(token=telegram_token)

@@ -5,6 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from commonModule import db_module, dy_module
 from bizLogic.filter_good_condition import filter_good_condition
+from commonModule.telegram_module import send_message_to_friends
 
 
 # DB 값 수정
@@ -74,9 +75,14 @@ def set_good_stc_info():
     end_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
     # 종료메시지
-    print("우량주 필터링 종료!!!")
-    print("시작시각: ", start_time)
-    print("종료시각: ", end_time)
+    end_msg = "우량주 필터링 종료!!!\n" + \
+              "시작시각: {}\n".format(start_time) + \
+              "종료시각: {}\n".format(end_time)
+    print(end_msg)
+
+    # 종료메시지송신
+    end_msg_sn = dy_module.now_dt("%Y%m%d%H%M%S%f")
+    send_message_to_friends(data=end_msg, msg_sn=end_msg_sn, destination='admin')
 
 
 if __name__ == "__main__":
