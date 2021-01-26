@@ -1,5 +1,5 @@
 #!/bin/bash
-echo '다중 파일 순차 실행'
+echo '다중 파일 순차 실행해요'
 {
 echo '2019'
 python3 /home/ubuntu/venv_findstock/bin/python3 /home/ubuntu/project_findstock/main/00_set_holiday_info.py '2019'
