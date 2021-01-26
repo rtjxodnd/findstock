@@ -12,8 +12,9 @@ from commonModule.telegram_module import set_stc_data, send_message_to_friends
 def insert_stc_alarm(db_class, dy, stc_id, price, msg_sn):
     # DB Insert
     try:
-        sql = "INSERT INTO findstock.sc_stc_alarm (dy, stc_id, judge_tcd, price, msg_sn) " \
-              "VALUES ('%s', '%s', '%s', '%d', '%s')" % (dy, stc_id, 'possToGo', price, msg_sn)
+        sql = "INSERT INTO findstock.sc_stc_alarm (dy, alarm_sn, stc_id, judge_tcd, price, msg_sn) " \
+              "VALUES ('%s', (select ifnull(max(x.alarm_sn),0)+1 from findstock.sc_stc_alarm x where dy='%s'), " \
+              "'%s', '%s', '%d', '%s')" % (dy, dy, stc_id, 'possToGo', price, msg_sn)
         db_class.execute(sql)
         db_class.commit()
         return
