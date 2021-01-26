@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # 휴일정보를 가져와서 일자 테이블에 휴일 정보 update 한다.
 import sys
 import os
@@ -78,6 +79,5 @@ def set_holiday_info():
     send_message_to_friends(data=end_msg, msg_sn=end_msg_sn, destination='admin')
 
 
-# -*- coding: utf-8 -*-
 if __name__ == '__main__':
     set_holiday_info()
