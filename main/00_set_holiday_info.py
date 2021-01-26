@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # 휴일정보를 가져와서 일자 테이블에 휴일 정보 update 한다.
 import sys
 import os
