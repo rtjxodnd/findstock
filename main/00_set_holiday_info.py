@@ -78,5 +78,6 @@ def set_holiday_info():
     send_message_to_friends(data=end_msg, msg_sn=end_msg_sn, destination='admin')
 
 
+# coding=<utf-8>
 if __name__ == '__main__':
     set_holiday_info()
