@@ -1,41 +1,18 @@
-# 휴일정보를 내려 받는다.
-# 매년 12월 25일 00시 01분
-00 00 25 12 * rm /home/ubuntu/project_findstock/logs/00_set_holiday_info.log
-01 00 25 12 * /home/ubuntu/venv_findstock/bin/python3 /home/ubuntu/project_findstock/main/00_set_holiday_info.py >> /home/ubuntu/project_findstock/logs/00_set_holiday_info.log
+# 년말배치
+# 매년 12월 31일 00시 00분
+00 00 31 12 * bash yearly_execute.sh
 
-# 종목 기본정보를 내려 받는다.
-# 월~금 매일 15시 00분
-59 14 * * 1-5 rm /home/ubuntu/project_findstock/logs/10_set_stc_basic_info.log
-00 15 * * 1-5 /home/ubuntu/venv_findstock/bin/python3 /home/ubuntu/project_findstock/main/10_set_stc_basic_info.py >> /home/ubuntu/project_findstock/logs/10_set_stc_basic_info.log
+# 월~목요일 배치
+# 월~목요일 15시
+00 15 * * 1-4 bash daily_execute.sh
 
-# 소형 재무 우수 종목중 매집봉 있는 종목 DB저장
-# 월~금 매일 15시 05분
-04 15 * * 1-5 rm /home/ubuntu/project_findstock/logs/12_set_buying_candle.log
-05 15 * * 1-5 /home/ubuntu/venv_findstock/bin/python3 /home/ubuntu/project_findstock/main/12_set_buying_candle.py  >> /home/ubuntu/project_findstock/logs/12_set_buying_candle.log
+# 금요일 배치
+# 금요일 15시
+00 15 * * 5 bash friday_execute.sh
 
-# 매집봉 존재 종목 중 급등 가능성 있는 종목 추출하여 메시지 송신
-# 월~금 매일 15시 10분
-09 15 * * 1-5 rm /home/ubuntu/project_findstock/logs/13_msg_stc_possible_to_go.log
-10 15 * * 1-5 /home/ubuntu/venv_findstock/bin/python3 /home/ubuntu/project_findstock/main/13_msg_stc_possible_to_go.py  >> /home/ubuntu/project_findstock/logs/13_msg_stc_possible_to_go.log
-
-# 재무 우수 종목을 추출하여 DB 정보 저장 한다.
-# 매주 금 16시00분
-59 15 * * 5 rm /home/ubuntu/project_findstock/logs/11_set_good_stc_info.log
-00 16 * * 5 /home/ubuntu/venv_findstock/bin/python3 /home/ubuntu/project_findstock/main/11_set_good_stc_info.py >> /home/ubuntu/project_findstock/logs/11_set_good_stc_info.log
-
-# 재무 우수 종목 이평선 정보를 설정한다
-# 월~금 17시 00분
-59 16 * * 1-5 rm /home/ubuntu/project_findstock/logs/14_set_stc_move_average.log
-00 17 * * 1-5 /home/ubuntu/venv_findstock/bin/python3 /home/ubuntu/project_findstock/main/14_set_stc_move_average.py other_day >> /home/ubuntu/project_findstock/logs/14_set_stc_move_average.log
-
-# 전종목 이평선 정보를 설정한다
-# 금 17시 00분
-59 16 * * 5 rm /home/ubuntu/project_findstock/logs/14_set_stc_move_average.log
-00 17 * * 5 /home/ubuntu/venv_findstock/bin/python3 /home/ubuntu/project_findstock/main/14_set_stc_move_average.py friday >> /home/ubuntu/project_findstock/logs/14_set_stc_move_average.log
-
-# 장 시작 후 이평선 정보 참고하여 돌파정목 포착한다.
+# 장중 배치
 # 월~ 금 09시 28분~ 14시 58분
 27 9 * * 1-5 rm /home/ubuntu/project_findstock/logs/15_msg_stc_ma_breakthrough.log
-58 09-14 * * 1-5 /home/ubuntu/venv_findstock/bin/python3 /home/ubuntu/project_findstock/main/15_msg_stc_ma_breakthrough.py >> /home/ubuntu/project_findstock/logs/15_msg_stc_ma_breakthrough.log
-28 09-14 * * 1-5 /home/ubuntu/venv_findstock/bin/python3 /home/ubuntu/project_findstock/main/15_msg_stc_ma_breakthrough.py >> /home/ubuntu/project_findstock/logs/15_msg_stc_ma_breakthrough.log
+58 09-14 * * 1-5 bash open_hour_execute.sh
+28 09-14 * * 1-5 bash open_hour_execute.sh
 
