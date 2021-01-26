@@ -20,15 +20,15 @@ def set_notice_data():
     return data
 
 
-# 친구에게 메시지송신(특정한 경우에는 test 계정에게 송신)
-def send_message_to_friends(data, msg_sn, destination='friend'):
+# 친구에게 메시지송신(특정한 경우에는 admin 계정에게 송신)
+def send_message_to_friends(data, msg_sn, destination='toGuest'):
     # db 클래스
     db_class = db_module.Database()
 
     # 토큰조회
-    if destination == 'friend':
+    if destination == 'toGuest':
         sql = "SELECT id, token_key from findstock.cm_tokens_and_keys where key_tcd = 'telegram_admin'"
-    elif destination == 'admin':
+    elif destination == 'toAdmin':
         sql = "SELECT id, token_key from findstock.cm_tokens_and_keys where key_tcd = 'telegram_admin'"
     row = db_class.execute_one(sql)
 
@@ -45,8 +45,8 @@ def send_message_to_friends(data, msg_sn, destination='friend'):
     tm = dy_module.now_tm()
     sn = msg_sn
     cn = data
-    insert_sql = "insert into findstock.cm_sent_msg (dy, sn, tm, cn) " \
-                 "values ('%s', '%s', '%s', '%s')" % (dy, sn, tm, cn)
+    insert_sql = "insert into findstock.cm_sent_msg (dy, sn, tcd, tm, cn) " \
+                 "values ('%s', '%s', '%s','%s', '%s')" % (dy, sn, destination, tm, cn)
     db_class.execute(insert_sql)
     db_class.commit()
 

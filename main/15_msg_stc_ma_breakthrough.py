@@ -230,7 +230,7 @@ def msg_stc_ma_breakthrough(check_ma=None, compare_ma=None, in_stc_id=None):
 
     # 종료메시지송신
     end_msg_sn = dy_module.now_dt("%Y%m%d%H%M%S%f")
-    send_message_to_friends(data=end_msg, msg_sn=end_msg_sn, destination='admin')
+    send_message_to_friends(data=end_msg, msg_sn=end_msg_sn, destination='toAdmin')
 
 
 if __name__ == "__main__":
