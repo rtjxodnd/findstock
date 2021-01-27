@@ -79,8 +79,8 @@ def set_stc_possible_to_go():
 
     # 당일, 조회 기준일, 제외 기준일
     dy = dy_module.now_dy()
-    base_dt = day_class.cal_tr_dy(-30)
-    except_dt = day_class.cal_tr_dy(-5)
+    base_dy = day_class.cal_tr_dy(-30)
+    except_dy = day_class.cal_tr_dy(-5)
 
     # db 모듈
     db_class = db_module.Database()
@@ -90,14 +90,14 @@ def set_stc_possible_to_go():
     db_class.execute(sql)
     db_class.commit()
 
-    # 대상건 조회(10거래일 이내의 매집봉 나타는 종목 only, 5일이내 같은 알림 보낸 종목은 제외)
+    # 대상건 조회(30거래일 이내의 매집봉 나타는 종목 only, 5일이내 같은 알림 보낸 종목은 제외)
     sql = "select a.stc_id, b.stc_name, b.price, a.stop_loss_price " \
           "from findstock.sc_stc_candle a, findstock.sc_stc_basic b " \
           "where a.stc_id = b.stc_id and a.dy >= '%s' " \
           "AND a.stc_id NOT IN(" \
           "select stc_id from findstock.sc_stc_alarm where dy >= '%s'" \
           "and judge_tcd = 'possToGo'" \
-          ")" % (base_dt, except_dt)
+          ")" % (base_dy, except_dy)
 
     rows = db_class.execute_all(sql)
 

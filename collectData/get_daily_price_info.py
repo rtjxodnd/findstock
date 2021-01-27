@@ -72,4 +72,4 @@ def get_daily_price_info(stc_id, goal_days):
 
 
 if __name__ == "__main__":
-    print(get_daily_price_info('352820', 20))
+    print(get_daily_price_info('352820', 30))

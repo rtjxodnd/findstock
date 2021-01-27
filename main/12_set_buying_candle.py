@@ -9,12 +9,12 @@ from collectData.get_daily_price_info import get_daily_price_info
 from commonModule.telegram_module import send_message_to_friends
 
 
-# DB 값 수정
-def update_stock_filter_info(db_class, dy, stc_id, price, stop_loss_price):
+# DB 값 입력
+def insert_stock_candle_info(db_class, dy, stc_id, price, deal_qnt, stop_loss_price):
     # DB Insert
     try:
-        sql = "INSERT INTO findstock.sc_stc_candle (dy, stc_id, price, stop_loss_price) " \
-              "VALUES ('%s', '%s', '%d', '%d')" % (dy, stc_id, price, stop_loss_price)
+        sql = "INSERT INTO findstock.sc_stc_candle (dy, stc_id, price, deal_qnt, stop_loss_price, available_yn) " \
+              "VALUES ('%s', '%s', '%d', '%d', '%d', 'Y')" % (dy, stc_id, price, deal_qnt, stop_loss_price)
         db_class.execute(sql)
         db_class.commit()
         return
@@ -54,7 +54,7 @@ def set_stc_candle_info():
           "where a.stc_id = b.stc_id and b.helth_yn = 'Y' AND a.tot_value < 500000000000"
     rows = db_class.execute_all(sql)
 
-    # 조회된 건수 바탕으로 판별 및 송신
+    # 조회된 건수 바탕으로 판별 및 설정
     for i, row in enumerate(rows):
         try:
             if i % 10 == 0:
@@ -66,18 +66,23 @@ def set_stc_candle_info():
 
             # 판별 및 DB 값 수정
             if search_buying_candle(stc_id)['buying_candle_yn']:
+                # 20일간 일별 가격정보
+                daily_price_info = get_daily_price_info(stc_id, 20)
 
                 # 손절라인(과거 20 거래일 가격정보 에서 최저가)
-                stop_loss_price = get_daily_price_info(stc_id, 20)['저가'].min()
+                stop_loss_price = daily_price_info['저가'].min()
+
+                # 당일 거래량
+                deal_qnt = daily_price_info['거래량'].iloc[0]
 
                 # db 값 변경
-                update_stock_filter_info(db_class, dy, stc_id, price, stop_loss_price)
+                insert_stock_candle_info(db_class, dy, stc_id, price, deal_qnt, stop_loss_price)
 
         except Exception as ex:
             print("에러: 매집봉정보 입력시 에러. 일자: {}, 종목코드: {}, 가격: {}".format(dy, stc_id, price))
             print(ex)
 
-    # 종료 메시지
+    # 최종커밋
     db_class.commit()
 
     # 종료 시간
