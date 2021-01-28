@@ -81,7 +81,7 @@ def set_stc_ma(in_stc_id=None):
         return
 
     # 시작메시지
-    print("종목별 이동평균 가격 저장 시작!!!")
+    print("종목별 이동평균 가격 저장 시작")
 
     # 시작시간
     start_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
@@ -93,7 +93,7 @@ def set_stc_ma(in_stc_id=None):
     end_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
     # 종료메시지
-    end_msg = "종목별 이동평균 가격 저장 종료!!!\n" + \
+    end_msg = "종목별 이동평균 가격 저장 완료\n" + \
               "시작시각: {}\n".format(start_time) + \
               "종료시각: {}\n".format(end_time)
     print(end_msg)

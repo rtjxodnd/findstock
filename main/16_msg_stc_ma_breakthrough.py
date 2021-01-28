@@ -58,9 +58,9 @@ def judge_ma_breakthrough(ma_num, compare_ma, ma_data):
         # 메시지 조립
         if break_yn:
             if ma_num == 1:
-                middle_msg = "현재가: " + middle_msg + "일선 돌파! \n"
+                middle_msg = "현재가: " + middle_msg + "일선 돌파 \n"
             else:
-                middle_msg = str(ma_num) + "일선: " + middle_msg + "일선 돌파! \n"
+                middle_msg = str(ma_num) + "일선: " + middle_msg + "일선 돌파 \n"
 
         return {"break_yn": break_yn, "middle_msg": middle_msg}
 
@@ -211,7 +211,7 @@ def msg_stc_ma_breakthrough(check_ma=None, compare_ma=None, in_stc_id=None):
         return
 
     # 시작메시지
-    print("이평선 돌파 메시지 송신 시작!!!")
+    print("이평선 돌파 메시지 송신 시작")
 
     # 시작시간
     start_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
@@ -223,7 +223,7 @@ def msg_stc_ma_breakthrough(check_ma=None, compare_ma=None, in_stc_id=None):
     end_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
     # 종료메시지
-    end_msg = "이평선 돌파 메시지 송신 종료!!!\n" + \
+    end_msg = "이평선 돌파 메시지 송신 완료\n" + \
               "시작시각: {}\n".format(start_time) + \
               "종료시각: {}\n".format(end_time)
     print(end_msg)

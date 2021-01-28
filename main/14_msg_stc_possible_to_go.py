@@ -49,7 +49,6 @@ def judge_stc_to_go(stc_id, now_price):
         return {"judge_to_go_yn": False}
 
     # 5일선으로 전고점을 추측해 본다.
-    before_high_value = 0
     if len(ma05_analysis["local_max_min_info"]["극대값"]) == 0:
         before_high_value = ma05_analysis["local_max_min_info"]["원근값"][-1]
     else:
@@ -72,14 +71,13 @@ def set_stc_possible_to_go():
         return
 
     # 시작메시지
-    print("상승예상 종목 판별/알림 시작!!!")
+    print("상승예상 종목 판별/알림 시작")
 
     # 시작시간
     start_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
-    # 당일, 조회 기준일, 제외 기준일
+    # 당일, 대상건 조회시 제외 기준일
     dy = dy_module.now_dy()
-    base_dy = day_class.cal_tr_dy(-30)
     except_dy = day_class.cal_tr_dy(-5)
 
     # db 모듈
@@ -90,14 +88,14 @@ def set_stc_possible_to_go():
     db_class.execute(sql)
     db_class.commit()
 
-    # 대상건 조회(30거래일 이내의 매집봉 나타는 종목 only, 5일이내 같은 알림 보낸 종목은 제외)
+    # 대상건 조회(현재 유효한 매집봉, 5일이내 같은 알림 보낸 종목은 제외)
     sql = "select a.stc_id, b.stc_name, b.price, a.stop_loss_price " \
           "from findstock.sc_stc_candle a, findstock.sc_stc_basic b " \
-          "where a.stc_id = b.stc_id and a.dy >= '%s' " \
+          "where a.stc_id = b.stc_id and a.available_yn = 'Y' " \
           "AND a.stc_id NOT IN(" \
           "select stc_id from findstock.sc_stc_alarm where dy >= '%s'" \
           "and judge_tcd = 'possToGo'" \
-          ")" % (base_dy, except_dy)
+          ")" % except_dy
 
     rows = db_class.execute_all(sql)
 
@@ -122,7 +120,7 @@ def set_stc_possible_to_go():
                 insert_stc_alarm(db_class, dy, stc_id, now_price, msg_sn)
 
                 # 메시지송신
-                text_msg = "상승예상 종목 확인!!! \n손절가: {:,}원".format(stop_loss_price)
+                text_msg = "상승예상 종목\n손절가: {:,}원".format(stop_loss_price)
                 msg = set_stc_data(stc_id=stc_id, stc_name=stc_name, text=text_msg)
                 send_message_to_friends(msg, msg_sn)
 
@@ -137,7 +135,7 @@ def set_stc_possible_to_go():
     end_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
     # 종료메시지
-    end_msg = "상승예상 종목 추출 및 메시지 송신 종료!!!\n" + \
+    end_msg = "상승예상 종목 추출 및 메시지 송신 완료\n" + \
               "시작시각: {}\n".format(start_time) + \
               "종료시각: {}\n".format(end_time)
     print(end_msg)

@@ -5,7 +5,6 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from commonModule import db_module, dy_module
 from bizLogic.search_buying_candle import search_buying_candle
-from collectData.get_daily_price_info import get_daily_price_info
 from commonModule.telegram_module import send_message_to_friends
 
 
@@ -32,19 +31,19 @@ def set_stc_candle_info():
         return
 
     # 시작메시지
-    print("소형우량주 매집봉 판별/입력 시작!!!")
+    print("소형우량주 매집봉 판별/입력 시작")
 
     # 시작시간
     start_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
-    # 당일
-    dy = dy_module.now_dy()
+    # 전거래일
+    bf_dy = day_class.cal_tr_dy(-1)
 
     # db 모듈
     db_class = db_module.Database()
 
     # 초기화
-    sql = "DELETE from findstock.sc_stc_candle WHERE dy = '%s'" % dy
+    sql = "DELETE from findstock.sc_stc_candle WHERE dy = '%s'" % bf_dy
     db_class.execute(sql)
     db_class.commit()
 
@@ -62,24 +61,25 @@ def set_stc_candle_info():
 
             # 판별대상 데이터
             stc_id = row['stc_id']
-            price = row['price']
 
             # 판별 및 DB 값 수정
-            if search_buying_candle(stc_id)['buying_candle_yn']:
-                # 20일간 일별 가격정보
-                daily_price_info = get_daily_price_info(stc_id, 20)
+            buying_candle = search_buying_candle(stc_id)
+            if buying_candle['buying_candle_yn']:
+                # 손절라인(매집봉 이전 10 거래일 중 최저가)
+                stop_loss_price = buying_candle['min_price_of_ten']
 
-                # 손절라인(과거 20 거래일 가격정보 에서 최저가)
-                stop_loss_price = daily_price_info['저가'].min()
+                # 매집봉 발생일 거래량 및 가격
+                deal_qnt = buying_candle['prices_info']['거래량']
+                price = buying_candle['prices_info']['종가']
 
-                # 당일 거래량
-                deal_qnt = daily_price_info['거래량'].iloc[0]
+                # 매집봉 발생일자
+                candle_dy = buying_candle['prices_info']['날짜'].replace('.', '')
 
                 # db 값 변경
-                insert_stock_candle_info(db_class, dy, stc_id, price, deal_qnt, stop_loss_price)
+                insert_stock_candle_info(db_class, candle_dy, stc_id, price, deal_qnt, stop_loss_price)
 
         except Exception as ex:
-            print("에러: 매집봉정보 입력시 에러. 일자: {}, 종목코드: {}, 가격: {}".format(dy, stc_id, price))
+            print("에러: 매집봉정보 입력시 에러. 일자: {}, 종목코드: {}, 가격: {}".format(candle_dy, stc_id, price))
             print(ex)
 
     # 최종커밋
@@ -89,7 +89,7 @@ def set_stc_candle_info():
     end_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
     # 종료메시지
-    end_msg = "소형우량주 매집봉 판별/입력 종료!!!\n" + \
+    end_msg = "소형우량주 매집봉 판별/입력 완료\n" + \
               "시작시각: {}\n".format(start_time) + \
               "종료시각: {}\n".format(end_time)
     print(end_msg)

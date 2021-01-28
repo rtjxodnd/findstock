@@ -31,7 +31,7 @@ def set_good_stc_info():
         return
 
     # 시작메시지
-    print("우량주 필터링 시작!!!")
+    print("우량주 필터링 시작")
 
     # 시작시간
     start_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
@@ -75,7 +75,7 @@ def set_good_stc_info():
     end_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
     # 종료메시지
-    end_msg = "우량주 필터링 종료!!!\n" + \
+    end_msg = "우량주 필터링 완료\n" + \
               "시작시각: {}\n".format(start_time) + \
               "종료시각: {}\n".format(end_time)
     print(end_msg)

@@ -49,7 +49,7 @@ def set_year_holiday_info(year):
 # main 처리
 def set_holiday_info():
     # 시작메시지
-    print("연도별 휴일정보 저장 시작!!!")
+    print("연도별 휴일정보 저장 시작")
 
     # 시작시간
     start_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
@@ -67,7 +67,7 @@ def set_holiday_info():
     end_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
     # 종료메시지
-    end_msg = "연도별 휴일정보 저장 종료!!!\n" + \
+    end_msg = "연도별 휴일정보 저장 완료\n" + \
               "시작시각: {}\n".format(start_time) + \
               "종료시각: {}\n".format(end_time) + \
               "처리건수: {}건".format(process_cnt)

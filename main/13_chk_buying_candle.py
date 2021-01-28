@@ -83,7 +83,7 @@ def chk_buying_candle():
         return
 
     # 시작메시지
-    print("매집봉 유효성 판별 시작!!!")
+    print("매집봉 유효성 판별 시작")
 
     # 시작시간
     start_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
@@ -130,7 +130,7 @@ def chk_buying_candle():
     end_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
     # 종료메시지
-    end_msg = "매집봉 유효성 판별 종료!!!\n" + \
+    end_msg = "매집봉 유효성 판별 완료\n" + \
               "시작시각: {}\n".format(start_time) + \
               "종료시각: {}\n".format(end_time)
     print(end_msg)
