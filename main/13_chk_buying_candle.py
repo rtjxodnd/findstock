@@ -68,7 +68,7 @@ def unavailable_candle_yn(each_row):
     is_price_down = check_price_info['종가'] / check_price_info['시가'] < 0.95
 
     # 개래량 하락폭 동시 달성여부
-    if check_price_info[is_upper_deal_qnt & is_price_down].shape[0] >0:
+    if check_price_info[is_upper_deal_qnt & is_price_down].shape[0] > 0:
         return True
 
     return False
@@ -100,7 +100,7 @@ def chk_buying_candle():
 
     # 개별 대상건 조회(현시점 기준 유효한 매집봉)
     sql = "select a.dy, a.stc_id, a.price, a.deal_qnt, a.stop_loss_price " \
-          "from findstock.sc_stc_candle a where a.available_yn = 'Y'"
+          "from findstock.sc_stc_candle a where a.available_yn = 'Y' and a.candle_tcd = 'type_1'"
     rows = db_class.execute_all(sql)
 
     # 조회된 건수 바탕으로 판별 및 설정

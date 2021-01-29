@@ -4,16 +4,18 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from commonModule import db_module, dy_module
-from bizLogic.search_buying_candle import search_buying_candle
+from bizLogic.search_buying_candle import search_buying_candle_1, search_buying_candle_2
 from commonModule.telegram_module import send_message_to_friends
 
 
 # DB 값 입력
-def insert_stock_candle_info(db_class, dy, stc_id, price, deal_qnt, stop_loss_price):
+def insert_stock_candle_info(db_class, dy, stc_id, candle_tcd, price, deal_qnt, stop_loss_price):
     # DB Insert
     try:
-        sql = "INSERT INTO findstock.sc_stc_candle (dy, stc_id, price, deal_qnt, stop_loss_price, available_yn) " \
-              "VALUES ('%s', '%s', '%d', '%d', '%d', 'Y')" % (dy, stc_id, price, deal_qnt, stop_loss_price)
+        sql = "INSERT INTO findstock.sc_stc_candle " \
+              "(dy, stc_id, candle_tcd, price, deal_qnt, stop_loss_price, available_yn) " \
+              "VALUES ('%s', '%s', '%s', '%d', '%d', '%d', 'Y')" % \
+              (dy, stc_id, candle_tcd, price, deal_qnt, stop_loss_price)
         db_class.execute(sql)
         db_class.commit()
         return
@@ -36,14 +38,17 @@ def set_stc_candle_info():
     # 시작시간
     start_time = dy_module.now_dt("%Y-%m-%d %H:%M:%S")
 
-    # 전거래일
+    # 당일/전거래일
+    nw_dy = dy_module.now_dy()
     bf_dy = day_class.cal_tr_dy(-1)
 
     # db 모듈
     db_class = db_module.Database()
 
     # 초기화
-    sql = "DELETE from findstock.sc_stc_candle WHERE dy = '%s'" % bf_dy
+    sql = "DELETE from findstock.sc_stc_candle WHERE dy = '%s' and candle_tcd = 'type_1'" % bf_dy
+    db_class.execute(sql)
+    sql = "DELETE from findstock.sc_stc_candle WHERE dy = '%s' and candle_tcd = 'type_2'" % nw_dy
     db_class.execute(sql)
     db_class.commit()
 
@@ -62,8 +67,8 @@ def set_stc_candle_info():
             # 판별대상 데이터
             stc_id = row['stc_id']
 
-            # 판별 및 DB 값 수정
-            buying_candle = search_buying_candle(stc_id)
+            # 판별 및 DB 값 수정(type_1)
+            buying_candle = search_buying_candle_1(stc_id)
             if buying_candle['buying_candle_yn']:
                 # 손절라인(매집봉 이전 10 거래일 중 최저가)
                 stop_loss_price = buying_candle['min_price_of_ten']
@@ -76,7 +81,23 @@ def set_stc_candle_info():
                 candle_dy = buying_candle['prices_info']['날짜'].replace('.', '')
 
                 # db 값 변경
-                insert_stock_candle_info(db_class, candle_dy, stc_id, price, deal_qnt, stop_loss_price)
+                insert_stock_candle_info(db_class, candle_dy, stc_id, 'type_1', price, deal_qnt, stop_loss_price)
+
+            # 판별 및 DB 값 수정(type_2)
+            buying_candle = search_buying_candle_2(stc_id)
+            if buying_candle['buying_candle_yn']:
+                # 손절라인(매집봉 이전 10 거래일 중 최저가)
+                stop_loss_price = buying_candle['min_price_of_ten']
+
+                # 매집봉 발생일 거래량 및 가격
+                deal_qnt = buying_candle['prices_info']['거래량']
+                price = buying_candle['prices_info']['종가']
+
+                # 매집봉 발생일자
+                candle_dy = buying_candle['prices_info']['날짜'].replace('.', '')
+
+                # db 값 변경
+                insert_stock_candle_info(db_class, candle_dy, stc_id, 'type_2', price, deal_qnt, stop_loss_price)
 
         except Exception as ex:
             print("에러: 매집봉정보 입력시 에러. 일자: {}, 종목코드: {}, 가격: {}".format(candle_dy, stc_id, price))
