@@ -125,13 +125,13 @@ def set_stc_possible_to_go():
     # 대상건 조회1(현재 유효한 매집봉 type_1, 5일이내 같은 알림 보낸 종목은 제외)
     select_sql_1 = "select a.stc_id, b.stc_name, b.price, a.stop_loss_price " \
                    "from findstock.sc_stc_candle a, findstock.sc_stc_basic b " \
-                   "where a.stc_id = b.stc_id and a.available_yn = 'Y' " \
+                   "where a.stc_id = b.stc_id and a.available_yn = 'Y' AND a.candle_tcd = 'type_1'" \
                    "AND a.stc_id NOT IN(" \
                    "select stc_id from findstock.sc_stc_alarm where dy >= '%s'" \
                    "and judge_tcd = 'possToGo'" \
                    ")" % except_dy
 
-    # 대상건 조회2(현재 유효한 매집봉 type_1, 당일발생 매집봉의 종목만 조회회)
+    # 대상건 조회2(현재 유효한 매집봉 type_2, 당일발생 매집봉의 종목만 조회회)
     select_sql_2 = "select a.stc_id, b.stc_name, b.price, count(*) as cnt, " \
                    "(select stop_loss_price from findstock.sc_stc_candle x " \
                    "where x.stc_id = a.stc_id and x.dy = (select max(dy) " \
@@ -202,7 +202,7 @@ def set_stc_possible_to_go():
                 insert_stc_alarm(db_class, dy, stc_id, now_price, msg_sn)
 
                 # 메시지송신
-                text_msg = "상승예상 종목\n손절가: {:,}원]\n매집봉출현: {}회".format(stop_loss_price, candle_cnt)
+                text_msg = "매집봉 출현 종목({}회)\n손절가: {:,}원".format(stop_loss_price, candle_cnt)
 
                 msg = set_stc_data(stc_id=stc_id, stc_name=stc_name, text=text_msg)
                 send_message_to_friends(msg, msg_sn)
@@ -211,7 +211,7 @@ def set_stc_possible_to_go():
             print("에러: 상승예상 종목(type_2) 추출시 에러. 일자: {}, 종목코드: {}, 가격: {}".format(dy, stc_id, now_price))
             print(ex)
 
-    # 종료 메시지
+    # 종료 커밋
     db_class.commit()
 
     # 종료 시간

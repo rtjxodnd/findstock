@@ -4,11 +4,11 @@
 
 # 월~목요일 배치
 # 월~목요일 15시
-00 15 * * 1-4 bash /home/ubuntu/project_findstock/execute/daily_execute.sh
+10 15 * * 1-4 bash /home/ubuntu/project_findstock/execute/daily_execute.sh
 
 # 금요일 배치
 # 금요일 15시
-00 15 * * 5 bash /home/ubuntu/project_findstock/execute/friday_execute.sh
+10 15 * * 5 bash /home/ubuntu/project_findstock/execute/friday_execute.sh
 
 # 장중 배치
 # 월~ 금 09시 28분~ 14시 58분

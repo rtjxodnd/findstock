@@ -8,13 +8,13 @@ import math
 import traceback
 
 # 공통변수
-FINANCE_URL = "https://finance.naver.com/item/sise_day.nhn?code="
+FINANCE_URL = "https://finance.naver.com/item/news_notice.nhn?code={}&page={}"
 
 
 # 해당 종목의 마지막 page 확인
-def get_last_page_of_stock(stc_id, goal_days=5):
+def get_last_page_of_disclosure(stc_id):
     try:
-        url = FINANCE_URL+stc_id
+        url = FINANCE_URL.format(stc_id, '1')
         page_call_result = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
         bs_obj = BeautifulSoup(page_call_result.content, "html.parser")
         td_pg_rr = bs_obj.find("td", {"class": "pgRR"})
@@ -27,23 +27,18 @@ def get_last_page_of_stock(stc_id, goal_days=5):
             href = td_pg_rr.find("a")["href"]
             last_page = int(href.split("=")[2])
 
-        # 불필요한 크롤링 방지위해서 원하는 기간만큼만 마지막 페이지를 설정한다.
-        # 한 페이지에 10개의 data 가 있다.
-        if last_page > goal_days/10:
-            last_page = math.ceil(goal_days/10)
-
         return last_page
 
     except Exception as ex:
-        print("에러: " + stc_id + " [" + str(goal_days) + "일]")
+        print("공지정보 마지막 페이지번호 추출 중 에러: " + stc_id)
         traceback.print_exc(ex)
 
 
 # 한개 page 처리
-def find_stock_values_of_one_page(stc_id, page=1):
+def find_disclosure_info_of_one_page(stc_id, page=1):
     try:
         # 데이터 탐색
-        url = FINANCE_URL+stc_id+"&page="+str(page)
+        url = FINANCE_URL.format(stc_id, page)
         page_call_result = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
         bs_obj = BeautifulSoup(page_call_result.text, 'lxml')
         _df = pd.read_html(str(bs_obj.find("table")), header=0)[0]
@@ -57,19 +52,30 @@ def find_stock_values_of_one_page(stc_id, page=1):
 
 
 # Main 처리: 마지막페이지를 구하고 첫 페이지부터 마지막페이지까지 크롤링
-def get_daily_price_info(stc_id, goal_days):
+def get_disclosure_info(stc_id, goal_day):
     # 결과 data frame 초기화
     result_value = None
 
     # 마지막 페이지
-    last_page = get_last_page_of_stock(stc_id, goal_days)
+    last_page = get_last_page_of_disclosure(stc_id)
 
     for page in range(1, last_page+1):
-        df = find_stock_values_of_one_page(stc_id, page)
+        # 한페이지 추출
+        df = find_disclosure_info_of_one_page(stc_id, page)
+
+        # 추출정보중 가장 오랜된 날짜 확인
+        oldest_day = df['날짜'].iloc[-1].replace('.', '')
+
+        # data 취합
         result_value = pd.concat([result_value, df], ignore_index=True)
+
+        # 추출정보중 가장 과거 날짜가 목표한 날짜 보다 과거 날짜이면 그만 추출한다.
+        if oldest_day <= goal_day:
+            break
 
     return result_value
 
 
 if __name__ == "__main__":
-    print(get_daily_price_info('352820', 30))
+    # print(get_last_page_of_disclosure('352820'))
+    print(get_disclosure_info('005930', '20190901'))

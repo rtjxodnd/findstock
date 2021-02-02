@@ -52,7 +52,7 @@ def set_stc_candle_info():
     db_class.execute(sql)
     db_class.commit()
 
-    # 대상건 조회(소형 우량주주 only)
+    # 대상건 조회(소형 우량주 only)
     sql = "select a.stc_id, a.stc_name, a.price " \
           "from findstock.sc_stc_basic a, findstock.sc_stc_filter b " \
           "where a.stc_id = b.stc_id and b.helth_yn = 'Y' AND a.tot_value < 500000000000"
