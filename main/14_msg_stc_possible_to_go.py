@@ -202,7 +202,7 @@ def set_stc_possible_to_go():
                 insert_stc_alarm(db_class, dy, stc_id, now_price, msg_sn)
 
                 # 메시지송신
-                text_msg = "매집봉 출현 종목({}회)\n손절가: {:,}원".format(stop_loss_price, candle_cnt)
+                text_msg = "매집봉 출현 종목({}회)\n손절가: {:,}원".format(candle_cnt, stop_loss_price)
 
                 msg = set_stc_data(stc_id=stc_id, stc_name=stc_name, text=text_msg)
                 send_message_to_friends(msg, msg_sn)
