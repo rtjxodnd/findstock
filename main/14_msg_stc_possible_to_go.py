@@ -9,12 +9,12 @@ from commonModule.telegram_module import set_stc_data, send_message_to_friends
 
 
 # DB insert
-def insert_stc_alarm(db_class, dy, stc_id, price, msg_sn):
+def insert_stc_alarm(db_class, dy, stc_id, judge_tcd, price, msg_sn):
     # DB Insert
     try:
         sql = "INSERT INTO findstock.sc_stc_alarm (dy, alarm_sn, stc_id, judge_tcd, price, msg_sn) " \
               "VALUES ('%s', (select ifnull(max(x.alarm_sn),0)+1 from findstock.sc_stc_alarm x where dy='%s'), " \
-              "'%s', '%s', '%d', '%s')" % (dy, dy, stc_id, 'possToGo', price, msg_sn)
+              "'%s', '%s', '%s', '%d', '%s')" % (dy, dy, stc_id, judge_tcd, price, msg_sn)
         db_class.execute(sql)
         db_class.commit()
         return
@@ -165,7 +165,7 @@ def set_stc_possible_to_go():
                 msg_sn = dy_module.now_dt("%Y%m%d%H%M%S%f")
 
                 # db insert
-                insert_stc_alarm(db_class, dy, stc_id, now_price, msg_sn)
+                insert_stc_alarm(db_class, dy, stc_id, 'possToGo', now_price, msg_sn)
 
                 # 메시지송신
                 text_msg = "상승예상 종목\n손절가: {:,}원".format(stop_loss_price)
@@ -199,7 +199,7 @@ def set_stc_possible_to_go():
                 msg_sn = dy_module.now_dt("%Y%m%d%H%M%S%f")
 
                 # db insert
-                insert_stc_alarm(db_class, dy, stc_id, now_price, msg_sn)
+                insert_stc_alarm(db_class, dy, stc_id, 'captureCandle', now_price, msg_sn)
 
                 # 메시지송신
                 text_msg = "매집봉 출현 종목({}회)\n손절가: {:,}원".format(candle_cnt, stop_loss_price)

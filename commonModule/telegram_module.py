@@ -27,7 +27,7 @@ def send_message_to_friends(data, msg_sn, destination='toGuest'):
 
     # 토큰조회
     if destination == 'toGuest':
-        sql = "SELECT id, token_key from findstock.cm_tokens_and_keys where key_tcd = 'telegram_admin'"
+        sql = "SELECT id, token_key from findstock.cm_tokens_and_keys where key_tcd = 'telegram'"
     elif destination == 'toAdmin':
         sql = "SELECT id, token_key from findstock.cm_tokens_and_keys where key_tcd = 'telegram_admin'"
     row = db_class.execute_one(sql)

@@ -40,7 +40,7 @@ def filter_good_condition(stc_id):
             return False
 
         # 52주 최저가의 2배가 현재가 보다 작으면 매수 안함
-        if float(df_price_info['52최저가']) * 2 < float(df_price_info['현재가']):
+        if float(df_price_info['52최저가']) * 4 < float(df_price_info['현재가']):
             return False
 
         # 최근 3년 매출액 중 음수가 있으면 매수 안함
@@ -91,4 +91,4 @@ def filter_good_condition(stc_id):
 
 
 if __name__ == '__main__':
-    print(filter_good_condition('227560')) # 352820
+    print(filter_good_condition('093520')) # 352820
