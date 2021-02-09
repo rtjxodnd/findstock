@@ -14,7 +14,7 @@ def insert_stc_alarm(db_class, dy, stc_id, judge_tcd, price, msg_sn):
     try:
         sql = "INSERT INTO findstock.sc_stc_alarm (dy, alarm_sn, stc_id, judge_tcd, price, msg_sn) " \
               "VALUES ('%s', (select ifnull(max(x.alarm_sn),0)+1 from findstock.sc_stc_alarm x where dy='%s'), " \
-              "'%s', '%s', '%s', '%d', '%s')" % (dy, dy, stc_id, judge_tcd, price, msg_sn)
+              "'%s', '%s', '%d', '%s')" % (dy, dy, stc_id, judge_tcd, price, msg_sn)
         db_class.execute(sql)
         db_class.commit()
         return
@@ -171,7 +171,7 @@ def set_stc_possible_to_go():
                 text_msg = "상승예상 종목\n손절가: {:,}원".format(stop_loss_price)
 
                 msg = set_stc_data(stc_id=stc_id, stc_name=stc_name, text=text_msg)
-                send_message_to_friends(msg, msg_sn, destination='toAdmin')
+                send_message_to_friends(msg, msg_sn)
 
         except Exception as ex:
             print("에러: 상승예상 종목(type_1) 추출시 에러. 일자: {}, 종목코드: {}, 가격: {}".format(dy, stc_id, now_price))
@@ -181,7 +181,7 @@ def set_stc_possible_to_go():
     msg_yn = False
 
     # 송신메시지
-    msg = "[{}년{}월{}일 매집봉 출현 종목]\n".format(dy[0:4], dy[4:6], dy[6:8])
+    msg = "[{}년{}월{}일 매집봉 출현 종목]\n\n".format(dy[0:4], dy[4:6], dy[6:8])
 
     # 조회된 건수 바탕으로 판별 및 송신(type_2)
     for j, row in enumerate(rows_2):
@@ -212,9 +212,9 @@ def set_stc_possible_to_go():
 
                 # 개별 메시지 내용 저장
                 text_msg = "매집봉 출현 종목\n손절가: {:,}원".format(stop_loss_price)
-                msg = set_stc_data(stc_id=stc_id, stc_name=stc_name, text=text_msg)
+                data_msg = set_stc_data(stc_id=stc_id, stc_name=stc_name, text=text_msg)
                 insert_sql = "insert into findstock.cm_sent_msg (dy, sn, tcd, tm, cn) " \
-                             "values ('%s', '%s', '%s','%s', '%s')" % (dy, msg_sn, 'toGuest', dy_module.now_tm(), msg)
+                             "values ('%s', '%s', '%s','%s', '%s')" % (dy, msg_sn, 'toGuest', dy_module.now_tm(), data_msg)
 
                 db_class.execute(insert_sql)
                 db_class.commit()
@@ -224,15 +224,15 @@ def set_stc_possible_to_go():
                 url_msg = "https://finance.naver.com/item/main.nhn?code={}\n\n".format(stc_id)
                 msg = msg+stc_msg+url_msg
 
-            # 메시지 송신
-            if msg_yn:
-                # 메시지순번(시간값으로 대신함)
-                msg_sn = dy_module.now_dt("%Y%m%d%H%M%S%f")
-                send_message_to_friends(msg, msg_sn, destination='toAdmin')
-
         except Exception as ex:
             print("에러: 상승예상 종목(type_2) 추출시 에러. 일자: {}, 종목코드: {}, 가격: {}".format(dy, stc_id, now_price))
             print(ex)
+
+    # 메시지 송신
+    if msg_yn:
+        # 메시지순번(시간값으로 대신함)
+        msg_sn = dy_module.now_dt("%Y%m%d%H%M%S%f")
+        send_message_to_friends(msg, msg_sn)
 
     # 종료 커밋
     db_class.commit()
@@ -253,4 +253,4 @@ def set_stc_possible_to_go():
 
 if __name__ == "__main__":
     set_stc_possible_to_go()
-    # print(judge_stc_to_go_1('228850', 11900))
+    # print(judge_stc_to_go_2('009780', 11900))
