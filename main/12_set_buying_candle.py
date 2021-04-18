@@ -70,12 +70,13 @@ def set_stc_candle_info():
             # 판별 및 DB 값 수정(type_1)
             buying_candle = search_buying_candle_1(stc_id)
             if buying_candle['buying_candle_yn']:
-                # 손절라인(매집봉 이전 10 거래일 중 최저가)
-                stop_loss_price = buying_candle['min_price_of_ten']
 
                 # 매집봉 발생일 거래량 및 가격
                 deal_qnt = buying_candle['prices_info']['거래량']
                 price = buying_candle['prices_info']['종가']
+
+                # 손절라인(매집봉 이전 10 거래일 중 최저가, 종가의 95% 중 큰 값)
+                stop_loss_price = max(buying_candle['min_price_of_ten'], price*0.95)
 
                 # 매집봉 발생일자
                 candle_dy = buying_candle['prices_info']['날짜'].replace('.', '')
@@ -86,12 +87,13 @@ def set_stc_candle_info():
             # 판별 및 DB 값 수정(type_2)
             buying_candle = search_buying_candle_2(stc_id)
             if buying_candle['buying_candle_yn']:
-                # 손절라인(매집봉 이전 10 거래일 중 최저가)
-                stop_loss_price = buying_candle['min_price_of_ten']
 
                 # 매집봉 발생일 거래량 및 가격
                 deal_qnt = buying_candle['prices_info']['거래량']
                 price = buying_candle['prices_info']['종가']
+
+                # 손절라인(매집봉 이전 10 거래일 중 최저가, 종가의 95% 중 큰 값)
+                stop_loss_price = max(buying_candle['min_price_of_ten'], price*0.95)
 
                 # 매집봉 발생일자
                 candle_dy = buying_candle['prices_info']['날짜'].replace('.', '')

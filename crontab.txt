@@ -3,16 +3,16 @@
 00 00 31 12 * bash /home/ubuntu/project_findstock/execute/yearly_execute.sh
 
 # 월~목요일 배치
-# 월~목요일 15시
-10 15 * * 1-4 bash /home/ubuntu/project_findstock/execute/daily_execute.sh
+# 월~목요일 15시 30분
+30 15 * * 1-4 bash /home/ubuntu/project_findstock/execute/daily_execute.sh
 
 # 금요일 배치
-# 금요일 15시
-10 15 * * 5 bash /home/ubuntu/project_findstock/execute/friday_execute.sh
+# 금요일 15시 30분
+30 15 * * 5 bash /home/ubuntu/project_findstock/execute/friday_execute.sh
 
-# 장중 배치
+# 장중 배치(미수행)
 # 월~ 금 09시 28분~ 14시 58분
-27 9 * * 1-5 rm /home/ubuntu/project_findstock/logs/15_msg_stc_ma_breakthrough.log
-58 09-14 * * 1-5 bash /home/ubuntu/project_findstock/execute/open_hour_execute.sh
-28 09-14 * * 1-5 bash /home/ubuntu/project_findstock/execute/open_hour_execute.sh
+# 27 9 * * 1-5 rm /home/ubuntu/project_findstock/logs/15_msg_stc_ma_breakthrough.log
+# 58 09-14 * * 1-5 bash /home/ubuntu/project_findstock/execute/open_hour_execute.sh
+# 28 09-14 * * 1-5 bash /home/ubuntu/project_findstock/execute/open_hour_execute.sh
 
