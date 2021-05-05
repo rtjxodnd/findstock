@@ -123,9 +123,16 @@ def set_stc_possible_to_go():
     db_class.commit()
 
     # 대상건 조회1(현재 유효한 매집봉 type_1, 5일이내 같은 알림 보낸 종목은 제외)
-    select_sql_1 = "select a.stc_id, b.stc_name, b.price, a.stop_loss_price " \
+    select_sql_1 = "select a.stc_id, b.stc_name, b.price, a.stop_loss_price, a.dy " \
                    "from findstock.sc_stc_candle a, findstock.sc_stc_basic b " \
-                   "where a.stc_id = b.stc_id and a.available_yn = 'Y' AND a.candle_tcd = 'type_1'" \
+                   "   , (select a.stc_id, max(a.dy) as dy " \
+                   "        from findstock.sc_stc_candle a, findstock.sc_stc_basic b " \
+                   "       where a.stc_id = b.stc_id and a.available_yn = 'Y' AND a.candle_tcd = 'type_1' " \
+                   "       group by a.stc_id) c " \
+                   "where a.stc_id = b.stc_id  " \
+                   "and a.stc_id = c.stc_id " \
+                   "and a.dy = c.dy  " \
+                   "and a.available_yn = 'Y' AND a.candle_tcd = 'type_1'  " \
                    "AND a.stc_id NOT IN(" \
                    "select stc_id from findstock.sc_stc_alarm where dy >= '%s'" \
                    "and judge_tcd = 'possToGo'" \
